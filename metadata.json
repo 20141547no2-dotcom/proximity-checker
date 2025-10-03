@@ -1,0 +1,5 @@
+{
+  "name": "Copy of Proximity Checker",
+  "description": "An application to check the relative distance from a given address to a list of predefined locations. Users can input an address, and the app will sort the predefined locations by proximity. An admin panel allows for adding new locations to the library.",
+  "requestFramePermissions": []
+}
