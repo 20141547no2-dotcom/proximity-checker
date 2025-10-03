@@ -1,7 +1,7 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import { Location, LocationWithDistance } from './types';
 import { INITIAL_LOCATIONS } from './constants';
-import { getCoordinatesForAddress } from './services/geminiService';
+import { getCoordinatesForAddress, getCoordinatesForAddresses } from './services/geminiService';
 import { getDistance } from './utils/distance';
 import LocationInput from './components/LocationInput';
 import LocationList from './components/LocationList';
@@ -80,35 +80,37 @@ export default function App(): React.ReactElement {
     setSortedLocations([]);
 
     try {
+      // 1. Fetch coordinates for the user's address first (fast single request).
       const userCoords = await getCoordinatesForAddress(userAddress);
       if (!userCoords) {
         throw new Error(`Could not find coordinates for "${userAddress}". Please try a more specific address.`);
       }
 
-      const locationsWithCoordsPromises = libraryLocations.map(async (location) => {
-        if (location.coordinates) {
-          return location;
-        }
-        const coords = await getCoordinatesForAddress(location.address);
-        return { ...location, coordinates: coords };
-      });
+      let currentLibraryLocations = [...libraryLocations];
 
-      const locationsWithCoords = await Promise.all(locationsWithCoordsPromises);
-      
-      // Update library state with newly fetched coordinates for caching
-      setLibraryLocations(currentLocations => {
-        const newLocations = [...currentLocations];
-        locationsWithCoords.forEach(updatedLocation => {
-            const index = newLocations.findIndex(l => l.id === updatedLocation.id);
-            if (index !== -1 && !newLocations[index].coordinates) {
-                newLocations[index] = updatedLocation;
-            }
+      // 2. Check if any library locations need geocoding.
+      const locationsToGeocode = currentLibraryLocations.filter(loc => !loc.coordinates);
+      if (locationsToGeocode.length > 0) {
+        const addressesToFetch = locationsToGeocode.map(loc => loc.address);
+        const coordinatesMap = await getCoordinatesForAddresses(addressesToFetch);
+
+        // 3. Map the newly fetched coordinates back to the library locations.
+        const updatedLocations = currentLibraryLocations.map(location => {
+          if (location.coordinates) {
+            return location; // Already has coords
+          }
+          const foundCoords = coordinatesMap.get(location.address);
+          return { ...location, coordinates: foundCoords || null };
         });
-        return newLocations;
-      });
 
-      const locationsWithDistance = locationsWithCoords
-        .filter(location => location.coordinates) // Filter out any locations we failed to geocode
+        // 4. Update the main library state for caching and re-assign for current operation.
+        setLibraryLocations(updatedLocations);
+        currentLibraryLocations = updatedLocations;
+      }
+      
+      // 5. Calculate distances and sort.
+      const locationsWithDistance = currentLibraryLocations
+        .filter(location => location.coordinates) // Filter out any we failed to geocode
         .map((location): LocationWithDistance => ({
           ...location,
           distance: getDistance(userCoords, location.coordinates!),
