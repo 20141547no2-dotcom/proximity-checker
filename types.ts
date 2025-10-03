@@ -8,7 +8,7 @@ export interface Location {
   id: number;
   name: string;
   address: string;
-  coordinates?: Coordinates | null;
+  coordinates: Coordinates;
 }
 
 export interface LocationWithDistance extends Location {
