@@ -1,73 +1,19 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Location, LocationWithDistance } from './types';
 import { INITIAL_LOCATIONS } from './constants';
 import { getCoordinatesForAddress, getCoordinatesForAddresses } from './services/geminiService';
 import { getDistance } from './utils/distance';
 import LocationInput from './components/LocationInput';
 import LocationList from './components/LocationList';
-import AdminPanel from './components/AdminPanel';
-import { MapPinIcon, WrenchScrewdriverIcon } from './components/icons';
-
-const STORAGE_KEY = 'proximity-checker-locations';
+import { MapPinIcon } from './components/icons';
 
 export default function App(): React.ReactElement {
-  const [libraryLocations, setLibraryLocations] = useState<Location[]>(() => {
-    try {
-      const storedLocations = window.localStorage.getItem(STORAGE_KEY);
-      if (storedLocations) {
-        return JSON.parse(storedLocations);
-      }
-    } catch (error) {
-      console.error("Error parsing locations from localStorage", error);
-    }
-    return INITIAL_LOCATIONS;
-  });
-  
+  // Library locations are now managed solely by the constants file.
+  // We use state here to hold geocoded results for the current session.
+  const [libraryLocations, setLibraryLocations] = useState<Location[]>(INITIAL_LOCATIONS);
   const [sortedLocations, setSortedLocations] = useState<LocationWithDistance[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [isAdminPanelOpen, setIsAdminPanelOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    try {
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(libraryLocations));
-    } catch (error) {
-        console.error("Error saving locations to localStorage", error);
-    }
-  }, [libraryLocations]);
-
-
-  const handleAddLocation = (name: string, address: string) => {
-    setLibraryLocations(prevLocations => [
-      ...prevLocations,
-      {
-        id: prevLocations.length > 0 ? Math.max(...prevLocations.map(l => l.id)) + 1 : 1,
-        name,
-        address,
-      }
-    ]);
-  };
-
-  const handleEditLocation = (idToUpdate: number, newName: string, newAddress: string) => {
-    setLibraryLocations(prevLocations =>
-      prevLocations.map(location => {
-        if (location.id === idToUpdate) {
-          // If address changed, invalidate coordinates to force re-fetching
-          const coordinates = location.address.trim().toLowerCase() === newAddress.trim().toLowerCase() 
-            ? location.coordinates 
-            : null;
-          return { ...location, name: newName, address: newAddress, coordinates };
-        }
-        return location;
-      })
-    );
-  };
-
-  const handleDeleteLocation = (idToDelete: number) => {
-    setLibraryLocations(prevLocations =>
-      prevLocations.filter(location => location.id !== idToDelete)
-    );
-  };
 
   const findNearest = useCallback(async (userAddress: string) => {
     if (!userAddress.trim()) {
@@ -88,7 +34,7 @@ export default function App(): React.ReactElement {
 
       let currentLibraryLocations = [...libraryLocations];
 
-      // 2. Check if any library locations need geocoding.
+      // 2. Check if any library locations need geocoding for this session.
       const locationsToGeocode = currentLibraryLocations.filter(loc => !loc.coordinates);
       if (locationsToGeocode.length > 0) {
         const addressesToFetch = locationsToGeocode.map(loc => loc.address);
@@ -103,7 +49,7 @@ export default function App(): React.ReactElement {
           return { ...location, coordinates: foundCoords || null };
         });
 
-        // 4. Update the main library state for caching and re-assign for current operation.
+        // 4. Update the component state for caching during this session.
         setLibraryLocations(updatedLocations);
         currentLibraryLocations = updatedLocations;
       }
@@ -158,28 +104,6 @@ export default function App(): React.ReactElement {
 
           <LocationList locations={sortedLocations} isLoading={isLoading} />
         </main>
-        
-        <footer className="mt-8">
-           <div className="flex justify-center">
-             <button
-               onClick={() => setIsAdminPanelOpen(prev => !prev)}
-               className="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition-colors duration-200 text-slate-300"
-             >
-               <WrenchScrewdriverIcon className="w-5 h-5" />
-               {isAdminPanelOpen ? 'Close Admin Panel' : 'Open Admin Panel'}
-             </button>
-           </div>
-           {isAdminPanelOpen && (
-             <div className="mt-4 bg-slate-800/50 backdrop-blur-sm rounded-2xl shadow-2xl p-6 sm:p-8 border border-slate-700">
-               <AdminPanel 
-                 onAddLocation={handleAddLocation}
-                 onEditLocation={handleEditLocation}
-                 onDeleteLocation={handleDeleteLocation} 
-                 locations={libraryLocations} 
-               />
-             </div>
-           )}
-        </footer>
       </div>
     </div>
   );
