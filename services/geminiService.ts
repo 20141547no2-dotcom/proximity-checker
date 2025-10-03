@@ -1,8 +1,15 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { Coordinates } from "../types";
 
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+// --- ACTION REQUIRED ---
+// PASTE YOUR API KEY IN THE LINE BELOW
+// You can get a free key from Google AI Studio: https://aistudio.google.com/
+const API_KEY = "AIzaSyC78qpYlmTh_jA5Fni4XREOwm-yD6RYAcQ";
+
+let ai: GoogleGenAI | null = null;
+if (API_KEY) {
+  ai = new GoogleGenAI({ apiKey: API_KEY });
+}
 
 const coordinatesSchema = {
   type: Type.OBJECT,
@@ -14,11 +21,9 @@ const coordinatesSchema = {
 };
 
 export async function getCoordinatesForAddress(address: string): Promise<Coordinates | null> {
-  if (!process.env.API_KEY) {
-    console.error("API_KEY environment variable not set.");
-    // Return mock data if API key is not available for development
-    // In a real app, you would throw an error.
-    return { lat: 21.0285, lng: 105.8542 }; // Mock Hanoi coordinates
+  if (!API_KEY || !ai) {
+    // This provides a clear error in the UI if the key is missing.
+    throw new Error("API Key not found. Please paste your Gemini API Key into the `services/geminiService.ts` file.");
   }
 
   try {
@@ -49,6 +54,10 @@ export async function getCoordinatesForAddress(address: string): Promise<Coordin
 
   } catch (error) {
     console.error(`Error fetching coordinates for address "${address}":`, error);
+    if (error instanceof Error) {
+        // Re-throw the error to be caught by the UI
+        throw new Error(`Failed to get coordinates. Gemini API Error: ${error.message}`);
+    }
     return null;
   }
 }
