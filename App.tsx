@@ -39,8 +39,8 @@ export default function App(): React.ReactElement {
       // Step 3: Sort the locations by distance.
       locationsWithDistance.sort((a, b) => a.distance - b.distance);
       
-      const top5Locations = locationsWithDistance.slice(0, 5);
-      setSortedLocations(top5Locations);
+      const top10Locations = locationsWithDistance.slice(0, 10);
+      setSortedLocations(top10Locations);
 
     } catch (e: unknown) {
       if (e instanceof Error) {

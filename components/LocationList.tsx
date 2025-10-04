@@ -59,7 +59,7 @@ export default function LocationList({ locations, isLoading }: LocationListProps
 
   return (
     <div className="mt-8">
-      <h2 className="text-2xl font-bold mb-4 text-slate-100">Top 5 Nearby Locations</h2>
+      <h2 className="text-2xl font-bold mb-4 text-slate-100">Top 10 Nearby Locations</h2>
       <ul className="space-y-4">
         {locations.map(item => <LocationItem key={item.id} item={item} />)}
       </ul>
