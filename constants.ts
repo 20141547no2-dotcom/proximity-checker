@@ -32,7 +32,7 @@ export const INITIAL_LOCATIONS: Location[] = [
 { id: 28, name: "110 Phố Xốm, Phường Phú Lương, Hà Nội", address: "110 Phố Xốm, Phường Phú Lương, Hà Nội", coordinates: { lat: 20.9445517, lng: 105.7567004 } },
 { id: 29, name: "Số 484 khu 7, Xã Hoài Đức, Hà Nội", address: "Số 484 khu 7, Xã Hoài Đức, Hà Nội", coordinates: { lat: 20.9905592, lng: 105.7264942 } },
 { id: 30, name: "208 Trần Lư, Xã Thường Tín, Hà Nội", address: "208 Trần Lư, Xã Thường Tín, Hà Nội", coordinates: { lat: 20.8713756, lng: 105.864753 } },
-{ id: 31, name: "59 Quang Trung, Xã Vân Đình, Hà Nội", address: "59 Quang Trung, Xã Vân Đình, Hà Nội", coordinates: { lat: 21.017885, lng: 105.8474564 } },
+{ id: 31, name: "59 Quang Trung, Xã Vân Đình, Hà Nội", address: "59 Quang Trung, Xã Vân Đình, Hà Nội", coordinates: { lat: 20.7323738, lng: 105.7718637 } },
 { id: 32, name: "176 Chùa Thông, Phường Sơn Tây, Hà Nội", address: "176 Chùa Thông, Phường Sơn Tây, Hà Nội", coordinates: { lat: 21.122787, lng: 105.5006748 } },
 { id: 33, name: "499 Đường Phú Lợi, Phường Phú Lợi, Hồ Chí Minh", address: "499 Đường Phú Lợi, Phường Phú Lợi, Hồ Chí Minh", coordinates: { lat: 10.9866151, lng: 106.6869758 } },
 { id: 34, name: "272 Đại Lộ Bình Dương, Phường Thủ Dầu Một, Hồ Chí Minh", address: "272 Đại Lộ Bình Dương, Phường Thủ Dầu Một, Hồ Chí Minh", coordinates: { lat: 10.9784207, lng: 106.6685769 } },
